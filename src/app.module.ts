@@ -5,6 +5,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 import { CaslModule } from './modules/casl/casl.module';
+import { TimeEntriesModule } from './modules/time-entries/time-entries.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CaslModule } from './modules/casl/casl.module';
     AuthModule,
     UsersModule,
     WorkspacesModule,
+    TimeEntriesModule,
   ],
   controllers: [],
   providers: [],
