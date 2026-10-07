@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package classification;
+
+// Defines the service exposed by the Python AI Microservice
+service NLPClassifier {
+  // A unary RPC to classify a single activity
+  rpc CategorizeActivity (CategorizeRequest) returns (CategorizeResponse) {}
+  
+  // A streaming RPC to classify batches with high throughput
+  rpc CategorizeBatch (CategorizeBatchRequest) returns (CategorizeBatchResponse) {}
+}
+
+// Request payload for a single window/process
+message CategorizeRequest {
+  string window_title = 1;
+  string process_name = 2;
+}
+
+// Response containing the ML prediction
+message CategorizeResponse {
+  string category = 1;
+  float confidence = 2;
+}
+
+// For high throughput batch processing
+message CategorizeBatchRequest {
+  repeated CategorizeRequest requests = 1;
+}
+
+message CategorizeBatchResponse {
+  repeated CategorizeResponse responses = 1;
+}
