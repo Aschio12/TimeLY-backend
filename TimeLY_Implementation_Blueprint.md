@@ -68,7 +68,7 @@ We will tackle this massive codebase one feature branch at a time.
 ### Phase 3: Introduction of AI (Python Microservice)
 *   **Step 3.1:** Scaffold a FastAPI Python service for ML. *(Done - TimeLY-ai repo with DDD)*
 *   **Step 3.2:** Train and deploy a basic NLP classification model (e.g., using HuggingFace `sentence-transformers`) to categorize URLs/Titles into categories (Work, Social, Dev, Design). *(Done - Zero-Shot Cosine Similarity Model)*
-*   **Step 3.3:** Connect NestJS to FastAPI via gRPC so incoming activity logs are instantly categorized.
+*   **Step 3.3:** Connect NestJS to FastAPI via gRPC so incoming activity logs are instantly categorized. *(Done - High Throughput gRPC Interop)*
 
 ### Phase 4: ERP & Billing
 *   **Step 4.1:** Build the financial schema (Rates, Invoices, Budgets).
