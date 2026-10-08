@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { PrismaService } from '../../database/prisma.service';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, timeout, retry } from 'rxjs';
 
 export class BatchTimeEntryDto {
   windowTitle!: string;
@@ -42,7 +42,7 @@ export class TimeEntriesService implements OnModuleInit {
       throw new BadRequestException('User is not a member of this workspace');
     }
 
-    // Step 3.3: High throughput AI classification via gRPC
+    // Step 3.3 Advanced: High throughput AI classification with Retry & Timeout resilience
     let aiCategories: string[] = [];
     try {
       const batchRequest = {
@@ -52,10 +52,15 @@ export class TimeEntriesService implements OnModuleInit {
         })),
       };
       
-      const aiResponse = await lastValueFrom(this.nlpClassifier.CategorizeBatch(batchRequest));
+      const aiResponse = await lastValueFrom(
+        this.nlpClassifier.CategorizeBatch(batchRequest).pipe(
+          timeout(2000), // Drop if AI takes longer than 2s to prevent NestJS request from hanging
+          retry(3)       // Retry 3 times automatically on failure
+        )
+      );
       aiCategories = aiResponse.responses.map(r => r.category);
     } catch (error) {
-      console.warn('gRPC ML Service unavailable, falling back to General category', error);
+      console.warn('gRPC ML Service unavailable or timed out, falling back to General category', error);
       aiCategories = entries.map(() => 'General');
     }
 
