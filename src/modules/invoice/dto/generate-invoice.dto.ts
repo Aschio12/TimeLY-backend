@@ -48,4 +48,9 @@ export class GenerateInvoiceDto {
   @IsNumber()
   @IsOptional()
   taxRate?: number; // e.g., 0.20 for 20%
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  timeEntryIds?: string[];
 }

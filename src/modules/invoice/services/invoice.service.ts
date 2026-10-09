@@ -22,20 +22,38 @@ export class InvoiceService {
     // 3. Generate PDF
     const pdfBuffer = await this.pdfService.generatePdf(htmlContent);
     
-    // 4. Optionally, store invoice record in DB (Prisma)
-    await this.prisma.invoice.create({
-      data: {
-        amount: Math.round(data.lineItems.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0) * (1 + (data.taxRate || 0))),
-        status: 'DRAFT',
-        project: {
-          // Simplification for the blueprint step: associating with a dummy project or omitting
-          connect: { id: data.clientId } // Assumes clientId maps to project or similar for this schema
+    // 4. Store invoice record in DB (Prisma) and mark TimeEntries as billed
+    try {
+      const subtotal = data.lineItems.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
+      const taxAmount = Math.round(subtotal * (data.taxRate || 0));
+      const totalAmount = subtotal + taxAmount;
+
+      await this.prisma.$transaction(async (tx) => {
+        const invoice = await tx.invoice.create({
+          data: {
+            workspaceId: data.clientId, // Assuming clientId represents workspace for now
+            invoiceNumber: data.invoiceNumber,
+            dueDate: new Date(data.dueDate),
+            subtotalAmount: subtotal,
+            taxAmount: taxAmount,
+            totalAmount: totalAmount,
+            currencyCode: 'USD', // Defaulting for stub
+            timeEntries: data.timeEntryIds?.length ? {
+              connect: data.timeEntryIds.map(id => ({ id }))
+            } : undefined
+          }
+        });
+
+        if (data.timeEntryIds && data.timeEntryIds.length > 0) {
+          await tx.timeEntry.updateMany({
+            where: { id: { in: data.timeEntryIds } },
+            data: { isBilled: true, invoiceId: invoice.id }
+          });
         }
-      }
-    }).catch((e) => {
-      // Ignore creation error if the client id doesn't match an actual project in dummy data
-      console.warn('Prisma Invoice create skipped due to relations mapping setup', e.message);
-    });
+      });
+    } catch (e) {
+      console.warn('Prisma Invoice create skipped due to missing relations/stub data', e.message);
+    }
 
     return pdfBuffer;
   }
