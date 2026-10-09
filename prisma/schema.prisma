@@ -19,6 +19,7 @@ model User {
   workspaces WorkspaceMember[]
   tasks      TaskAssignee[]
   timeEntries TimeEntry[]
+  userRates   UserRate[]
 }
 
 model Workspace {
@@ -28,9 +29,15 @@ model Workspace {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members     WorkspaceMember[]
-  spaces      Space[]
-  timeEntries TimeEntry[]
+  members        WorkspaceMember[]
+  spaces         Space[]
+  timeEntries    TimeEntry[]
+  
+  // ERP & Billing Relations
+  workspaceRate  WorkspaceRate?
+  budget         WorkspaceBudget?
+  invoices       Invoice[]
+  userRates      UserRate[]
 }
 
 enum WorkspaceRole {
@@ -76,6 +83,10 @@ model Project {
 
   space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   tasks       Task[]
+  
+  // ERP & Billing Relations
+  projectRate ProjectRate?
+  budget      ProjectBudget?
 }
 
 enum TaskStatus {
@@ -136,4 +147,142 @@ model Category {
   name        String   @unique
   color       String?
   timeEntries TimeEntry[]
+}
+
+
+// ==========================================
+// PHASE 4: ERP, BILLING & FINANCIAL SCHEMA
+// ==========================================
+
+model Currency {
+  code          String   @id // e.g., USD, EUR, GBP
+  symbol        String
+  name          String
+  exchangeRates ExchangeRate[]
+  invoices      Invoice[]
+  workspaceRates WorkspaceRate[]
+  projectRates   ProjectRate[]
+  userRates      UserRate[]
+}
+
+model ExchangeRate {
+  id              String   @id @default(uuid())
+  currencyCode    String
+  baseCurrency    String   @default("USD")
+  rate            Float    // 1 USD = X Currency
+  effectiveFrom   DateTime
+  effectiveTo     DateTime?
+  
+  currency        Currency @relation(fields: [currencyCode], references: [code])
+}
+
+// Hierarchical Rates (stored in minor units/cents)
+model WorkspaceRate {
+  id           String   @id @default(uuid())
+  workspaceId  String   @unique
+  hourlyRate   Int      // in cents
+  currencyCode String
+  
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  currency     Currency  @relation(fields: [currencyCode], references: [code])
+}
+
+model ProjectRate {
+  id           String   @id @default(uuid())
+  projectId    String   @unique
+  hourlyRate   Int      
+  currencyCode String
+  
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  currency     Currency  @relation(fields: [currencyCode], references: [code])
+}
+
+model UserRate {
+  id           String   @id @default(uuid())
+  userId       String
+  workspaceId  String
+  hourlyRate   Int      
+  currencyCode String
+  
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  currency     Currency  @relation(fields: [currencyCode], references: [code])
+
+  @@unique([userId, workspaceId])
+}
+
+// Invoicing & Append-Only Ledger
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  VOID
+  OVERDUE
+}
+
+model Invoice {
+  id              String   @id @default(uuid())
+  workspaceId     String
+  invoiceNumber   String   @unique
+  issuedAt        DateTime @default(now())
+  dueDate         DateTime
+  subtotalAmount  Int      // cents
+  taxAmount       Int      // cents
+  totalAmount     Int      // cents
+  currencyCode    String
+  status          InvoiceStatus @default(DRAFT)
+  notes           String?
+  
+  workspace       Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  currency        Currency   @relation(fields: [currencyCode], references: [code])
+  lineItems       InvoiceLineItem[]
+  payments        Payment[]
+}
+
+model InvoiceLineItem {
+  id              String   @id @default(uuid())
+  invoiceId       String
+  description     String
+  quantity        Float    // e.g., hours worked
+  unitPrice       Int      // cents
+  amount          Int      // cents
+  
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  invoiceId       String
+  amount          Int      // cents
+  paymentDate     DateTime @default(now())
+  method          String   // e.g., STRIPE, BANK_TRANSFER
+  referenceId     String?
+  status          PaymentStatus @default(PENDING)
+  
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+// Budgeting Limits
+model WorkspaceBudget {
+  id              String   @id @default(uuid())
+  workspaceId     String   @unique
+  amount          Int      // cents
+  period          String   // e.g., MONTHLY, YEARLY
+  
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model ProjectBudget {
+  id              String   @id @default(uuid())
+  projectId       String   @unique
+  amount          Int      // cents
+  
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
