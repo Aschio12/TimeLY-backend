@@ -7,6 +7,8 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 import { CaslModule } from './modules/casl/casl.module';
 import { TimeEntriesModule } from './modules/time-entries/time-entries.module';
 
+import { InvoiceModule } from './modules/invoice/invoice.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -18,6 +20,7 @@ import { TimeEntriesModule } from './modules/time-entries/time-entries.module';
     UsersModule,
     WorkspacesModule,
     TimeEntriesModule,
+    InvoiceModule,
   ],
   controllers: [],
   providers: [],
