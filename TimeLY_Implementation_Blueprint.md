@@ -71,7 +71,7 @@ We will tackle this massive codebase one feature branch at a time.
 *   **Step 3.3:** Connect NestJS to FastAPI via gRPC so incoming activity logs are instantly categorized. *(Done - High Throughput gRPC Interop)*
 
 ### Phase 4: ERP & Billing
-*   **Step 4.1:** Build the financial schema (Rates, Invoices, Budgets).
+*   **Step 4.1:** Build the financial schema (Rates, Invoices, Budgets). *(Done - Multi-currency & Ledger design)*
 *   **Step 4.2:** Implement the UI for Project Managers to assign budgets and track burn rates.
 *   **Step 4.3:** Build the automated PDF invoice generator.
 
