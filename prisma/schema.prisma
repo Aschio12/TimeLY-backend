@@ -133,6 +133,8 @@ model TimeEntry {
   workspaceId String
   taskId      String?
   categoryId  String?
+  isBilled    Boolean  @default(false)
+  invoiceId   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -140,6 +142,7 @@ model TimeEntry {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   task        Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  invoice     Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
 }
 
 model Category {
@@ -237,6 +240,7 @@ model Invoice {
   currency        Currency   @relation(fields: [currencyCode], references: [code])
   lineItems       InvoiceLineItem[]
   payments        Payment[]
+  timeEntries     TimeEntry[]
 }
 
 model InvoiceLineItem {
