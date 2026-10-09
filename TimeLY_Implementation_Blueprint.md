@@ -72,7 +72,7 @@ We will tackle this massive codebase one feature branch at a time.
 
 ### Phase 4: ERP & Billing
 *   **Step 4.1:** Build the financial schema (Rates, Invoices, Budgets). *(Done - Multi-currency & Ledger design)*
-*   **Step 4.2:** Implement the UI for Project Managers to assign budgets and track burn rates.
+*   **Step 4.2:** Implement the UI for Project Managers to assign budgets and track burn rates. *(Done - ERP Dashboard with Burn Rate splines)*
 *   **Step 4.3:** Build the automated PDF invoice generator.
 
 ### Phase 5: Predictive Analytics & Copilot
