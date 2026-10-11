@@ -73,12 +73,12 @@ We will tackle this massive codebase one feature branch at a time.
 ### Phase 4: ERP & Billing
 *   **Step 4.1:** Build the financial schema (Rates, Invoices, Budgets). *(Done - Multi-currency & Ledger design)*
 *   **Step 4.2:** Implement the UI for Project Managers to assign budgets and track burn rates. *(Done - ERP Dashboard with Burn Rate splines)*
-*   **Step 4.3:** Build the automated PDF invoice generator.
+*   **Step 4.3:** Build the automated PDF invoice generator. *(Done - Puppeteer PDF microservice with Handlebars)*
 
 ### Phase 5: Predictive Analytics & Copilot
-*   **Step 5.1:** Implement the Burnout Prediction model based on anomaly detection over time-series data.
-*   **Step 5.2:** Integrate LangChain/OpenAI into the Python service to create the "TimeLY Copilot".
-*   **Step 5.3:** Build the Chat UI in Flutter for conversational querying of time data.
+*   **Step 5.1:** Implement the Burnout Prediction model based on anomaly detection over time-series data. *(Done - Scikit-Learn IsolationForest in TimeLY-ai)*
+*   **Step 5.2:** Integrate LangChain/OpenAI into the Python service to create the "TimeLY Copilot". *(Done - LangChain Tools Agent with ChatGPT-4 in TimeLY-ai)*
+*   **Step 5.3:** Build the Chat UI in Flutter for conversational querying of time data. *(Done - Conversational Copilot UI with Riverpod, Dio & Markdown bubbles)*
 
 ---
 **Are you ready to begin?** If this scale aligns with your vision, we will immediately start executing **Phase 1, Step 1.1** (Setting up the NestJS Postgres/Prisma Foundation & Auth). Let me know!
